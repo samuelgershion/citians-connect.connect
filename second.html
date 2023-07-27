@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* CSS styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    
+    #backgroundVideo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 104%;
+      height: 118%;
+      z-index: -1;
+      object-fit: cover;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 150px;
+      background-color: transparent;
+    }
+    
+    h1 {
+      color: #333;
+    }
+    
+    #videoElement {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    /* Button styles */
+    button {
+      display: block;
+      margin: 10px 0;
+      padding: 49px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* User list styles */
+    #userList {
+      margin-top: 20px;
+      color: #333;
+    }
+
+    #userList ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    #userList li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <video id="backgroundVideo" autoplay loop muted>
+    <source src="sg.mp4" type="video/mp4">
+  </video>
+
+  <div class="container">
+    <h1>Second Page</h1>
+    
+    <button id="startScreenButton">Start Screen Sharing</button>
+    <button id="startCameraButton">Start Camera</button>
+    <button id="stopButton">Stop Sharing</button>
+    
+    <video id="videoElement" autoplay></video>
+    
+    <div id="userList">
+      <h2>Connected Users:</h2>
+      <ul id="users"></ul>
+    </div>
+    
+    <script>
+      // JavaScript code
+      var startScreenButton = document.getElementById("startScreenButton");
+      var startCameraButton = document.getElementById("startCameraButton");
+      var stopButton = document.getElementById("stopButton");
+      var videoElement = document.getElementById("videoElement");
+      var userList = document.getElementById("users");
+      var mediaStream = null;
+      var connectedUsers = []; // Array to store connected users
+
+      // Function to update the user list
+      function updateUserList() {
+        userList.innerHTML = "";
+        connectedUsers.forEach(function(user) {
+          var listItem = document.createElement("li");
+          listItem.textContent = user;
+          userList.appendChild(listItem);
+        });
+      }
+
+      // Start screen sharing button click event
+      startScreenButton.addEventListener("click", function() {
+        navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+          .then(function(stream) {
+            mediaStream = stream;
+            videoElement.srcObject = stream;
+          })
+          .catch(function(error) {
+            console.error("Error accessing display media: ", error);
+          });
+      });
+      
+      // Start camera button click event
+      startCameraButton.addEventListener("click", function() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then(function(stream) {
+            mediaStream = stream;
+            videoElement.srcObject = stream;
+          })
+          .catch(function(error) {
+            console.error("Error accessing camera: ", error);
+          });
+      });
+      
+      // Stop sharing button click event
+      stopButton.addEventListener("click", function() {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(function(track) {
+            track.stop();
+          });
+          mediaStream = null;
+          videoElement.srcObject = null;
+        }
+      });
+
+      // Function to handle new user connection
+      function handleNewUserConnect(username) {
+        connectedUsers.push(username);
+        updateUserList();
+      }
+
+      // Function to handle user disconnection
+      function handleUserDisconnect(username) {
+        connectedUsers = connectedUsers.filter(user => user !== username);
+        updateUserList();
+      }
+
+      // Example: Simulating connected users
+      // Replace this with your actual code to handle user connections and disconnections
+      // For demonstration purposes, we are using setTimeout to simulate user connections and disconnections
+      setTimeout(function() {
+        handleNewUserConnect("User1");
+      }, 1000);
+
+      setTimeout(function() {
+        handleNewUserConnect("User2");
+      }, 2000);
+
+      setTimeout(function() {
+        handleNewUserConnect("User3");
+      }, 3000);
+
+      setTimeout(function() {
+        handleUserDisconnect("User1");
+      }, 4000);
+    </script>
+  </div>
+</body>
+</html>
